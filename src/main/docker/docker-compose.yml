@@ -1,0 +1,27 @@
+services:
+  postgres_db:
+    image: postgres:15
+    container_name: sicredi_postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  spark-app:
+    build:
+      context: ../../../
+      dockerfile: src/main/docker/Dockerfile
+    depends_on:
+      - postgres_db
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DIR_SAIDA: ${DIR_SAIDA}
+    volumes:
+      - ${DIR_SAIDA_LOCAL}:/app/output
